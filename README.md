@@ -27,10 +27,7 @@ Minimal CRM + intent ingestion built with:
     - `password: admin123` 
   
   **Step 2: Seed Sample Accounts**
-  - After creating the admin user, run the accounts seeding script:
-    ```bash
-    node src/app/scripts/seedAccounts.js
-    ```
+  - After creating the admin user, click the seed accounts button.
   - This will create 4 sample accounts:
     - Acme Corp (acme.com) - Manufacturing
     - Globex Inc (globex.com) - SaaS
