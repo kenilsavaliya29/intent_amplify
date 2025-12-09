@@ -11,6 +11,8 @@ export default function AccountsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedMessage, setSeedMessage] = useState("");
 
   async function loadAccounts(search) {
     setLoading(true);
@@ -40,6 +42,35 @@ export default function AccountsPage() {
   useEffect(() => {
     loadAccounts("");
   }, []);
+
+  async function handleSeed() {
+    setSeeding(true);
+    setSeedMessage("");
+    setError("");
+    try {
+      const res = await fetch("/api/accounts/seed", { method: "POST" });
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+      const data = await res.json();
+      if (!res.ok) {
+        setSeedMessage(data?.error || "Failed to seed accounts");
+      } else {
+        const createdCount = Array.isArray(data?.created) ? data.created.length : 0;
+        const skippedCount = Array.isArray(data?.skipped) ? data.skipped.length : 0;
+        setSeedMessage(
+          `Seeded ${createdCount} new account(s). Skipped ${skippedCount} existing.`
+        );
+        // refresh list to show new accounts
+        loadAccounts(query);
+      }
+    } catch (e) {
+      setSeedMessage("Network error while seeding accounts");
+    } finally {
+      setSeeding(false);
+    }
+  }
 
   function handleSearch(e) {
     e.preventDefault();
@@ -71,12 +102,22 @@ export default function AccountsPage() {
               Dashboard
             </button>
           </div>
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="text-sm py-2 px-3 bg-red-500 rounded-md font-bold cursor-pointer hover:bg-red-600 text-white"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSeed}
+              disabled={seeding}
+              className="text-sm py-2 px-3 bg-emerald-600 rounded-md font-bold cursor-pointer hover:bg-emerald-700 text-white disabled:opacity-60"
+            >
+              {seeding ? "Seeding..." : "Seed sample accounts"}
+            </button>
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="text-sm py-2 px-3 bg-red-500 rounded-md font-bold cursor-pointer hover:bg-red-600 text-white"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-6 py-6">
@@ -95,10 +136,19 @@ export default function AccountsPage() {
             Search
           </button>
         </form>
-        {error && (
-          <p className="text-sm text-red-600 mb-3" role="alert">
-            {error}
-          </p>
+        {(error || seedMessage) && (
+          <div className="mb-3 space-y-1">
+            {error && (
+              <p className="text-sm text-red-600" role="alert">
+                {error}
+              </p>
+            )}
+            {seedMessage && (
+              <p className="text-sm text-emerald-700" role="status">
+                {seedMessage}
+              </p>
+            )}
+          </div>
         )}
         {loading ? (
           <p className="text-sm text-zinc-600">Loading accounts...</p>
