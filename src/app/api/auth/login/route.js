@@ -17,6 +17,30 @@ export async function POST(request) {
       );
     }
 
+    // Hardcoded admin bypass for local access
+    if (email === 'admin@gmail.com' && password === 'admin123') {
+      const token = signJwt({ userId: 'admin', email });
+
+      const response = NextResponse.json({
+        success: true,
+        token,
+        user: {
+          id: 'admin',
+          email,
+        },
+      });
+
+      response.cookies.set('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return response;
+    }
+
     const user = await User.findOne({ email }).exec();
 
     if (!user) {
