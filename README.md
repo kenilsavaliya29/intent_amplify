@@ -22,14 +22,9 @@ Minimal CRM + intent ingestion built with:
   
   **Step 1: Create Admin User**
   - Ensure MongoDB is running locally.
-  - Run the admin creation script:
-    ```bash
-    node src/app/scripts/adminEntry.js
-    ```
-  - This will create a default admin user with:
+  - Using this id pass will always log in as for now I have hardcode it for reviewer
     - `email: admin@gmail.com`
     - `password: admin123` 
-  - If the admin user already exists, the script will skip creation.
   
   **Step 2: Seed Sample Accounts**
   - After creating the admin user, run the accounts seeding script:
